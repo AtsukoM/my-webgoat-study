@@ -13,11 +13,11 @@ name: "CodeQL Advanced"
 
 on:
   push:
-#    branches: [ "dependabot/github_actions/actions/checkout-6" ]
-    branches: [ "main" ]
+    branches: [ "dependabot/github_actions/actions/checkout-6" ]
+#    branches: [ "main" ]
   pull_request:
-  #  branches: [ "dependabot/github_actions/actions/checkout-6" ]
-    branches: [ "main" ]
+    branches: [ "dependabot/github_actions/actions/checkout-6" ]
+  #  branches: [ "main" ]
   schedule:
     - cron: '36 20 * * 4'
 
