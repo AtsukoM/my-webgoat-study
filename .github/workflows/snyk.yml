@@ -1,0 +1,40 @@
+name: "Snyk Security Scan"
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven' # キャッシュを有効にすると次回から早くなります
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk Test and Generate SARIF
+        continue-on-error: true # 脆弱性があっても次のアップロードに進むため
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          # testコマンドを直接叩き、出力先を指定する
+          snyk test --sarif-file-output=snyk.sarif --file=pom.xml
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
