@@ -1,0 +1,33 @@
+name: "Snyk Security Scan"
+
+on:
+  push:
+    branches: [ "dependabot/github_actions/actions/checkout-6" ]
+  pull_request:
+    branches: [ "dependabot/github_actions/actions/checkout-6" ]
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17' # WebGoatのバージョンに合わせる
+          distribution: 'temurin'
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        continue-on-error: true # 脆弱性があってもワークフローを止めない設定
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
+
+      - name: Upload Snyk result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
